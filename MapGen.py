@@ -1,5 +1,5 @@
-import VectorMaps
-from os import system
+import VectorMaps, json, sys
+from os import system, path
 
 
 #Used instead of print() and input() for purposes of accessibility to screenreaders
@@ -23,6 +23,10 @@ def validate_position(position, bound):
     else:
         return True
         
+def export(data):
+    with open('data.json', 'w') as outfile:
+        json.dump(data, outfile)
+        outfile.close()
     
 #Commands that can be used in tile edit mode
 
@@ -130,7 +134,7 @@ def edit_field(tile):
         return
         
     while 1:
-        option = str(dual_input('Enter the name of the item you want to edit. Options are: \'anchorX\', \'anchorY\', \'width\', \'height\', and \'name\'. To exit, use \'save\' to save changes and exit or \'cancel\' to revert changes and exit.')).lower().strip()
+        option = str(dual_input('Enter the name of the variable you want to edit. Options are: \'anchorX\', \'anchorY\', \'width\', \'height\', and \'name\'. To exit, use \'save\' to save changes and exit or \'cancel\' to revert changes and exit: ')).lower().strip()
         if option == 'anchorx':
             dual_print('The anchor\'s current coordinates are ' + str(tile.fields[active_field_index].anchor) + '.')
             try:
@@ -157,6 +161,16 @@ def edit_field(tile):
                     dual_print('Done. The anchor\'s coordinates are now ' + str(tile.fields[active_field_index].anchor) + '.')
                 else:
                     dual_print('Error: the edge of the field is now out of bounds. Cancelling action.')
+                    
+        elif option == 'name':
+            try:
+                new_name = str(dual_input('Enter the new name for the field: '))
+            except:
+                dual_print('Something went wrong. Please report this error.')
+                continue
+            else:
+                tile.fields[active_field_index].name = new_name
+                dual_print('New name has been set.')
                     
                     
         elif option == 'width':
@@ -185,7 +199,7 @@ def edit_field(tile):
                 else:
                     dual_print('Error: the edge of the field is now out of bounds. Cancelling action.')
 
-        elif option == 'clipping'
+        elif option == 'clipping':
             field_clips = dual_input('Can entities pass through this field? Y/n: ')
             if field_clips.lower() == 'y':
                 tile.fields[active_field_index].clipping = True
@@ -217,7 +231,7 @@ def delete_field(tile):
             dual_print('Deleting field...')
             found = True
             tile.fields.remove(f)
-            dual_print('Tile deleted. Returning to tile edit mode.')
+            dual_print('Field deleted. Returning to tile edit mode.')
             return tile
     
     if not found:
@@ -240,22 +254,83 @@ def view_field(tile):
         return
 
 def parse_command(command, tile):
-    command_dict = {'field' : {'list' : list_fields, 'new' : create_field, 'delete' : delete_field, 'edit' : edit_field, 'view' : view_field}}
+    command_dict = {
+    'field' : {'list' : list_fields, 'new' : create_field, 'delete' : delete_field, 'edit' : edit_field, 'view' : view_field},
+    'goto' : [],
+    'help' : ['field', 'goto'],
+    'save' : [],
+    }
+    
+    
+    
     commands = command.split(' ')
     try:
         options = command_dict[commands[0]]
     except:
         dual_print('Error, invalid command.')
     else:
-        try:
-            if commands[1] in options:
-                tile = options[commands[1]](tile)
-                return tile
-            else:
-                dual_print('Error, invalid argument')
-        except:
-            dual_print('You need to provide an argument.')
-            raise
+        if commands[0] == 'field':
+            try:
+                if commands[1] in options:
+                    tile = options[commands[1]](tile)
+                    return tile
+                else:
+                    dual_print('Error, invalid argument')
+            except:
+                dual_print('You need to provide an argument. Try \'list\', \'new\', \'delete\', \'edit\', or \'view\'.')
+                #raise
+        
+        elif commands[0] == 'help':
+            try:
+                if commands[1] not in options:
+                    raise Error
+                else:
+                    dual_print('Extended help menu is coming soon') # DO THIS AFTER EVERYTHING ELSE!
+                    dual_print('Valid arguments are \'field\', \'help\'.')
+            
+            except:
+                dual_print('Valid commands and arguments are \'field\', \'help\'.')            
+                #raise
+                
+        elif commands[0] == 'save':
+            return 'save'
+
+        
+        elif commands[0] == 'goto':        
+            while 1:
+                try:
+                    new_x = int(dual_input('Enter the X-position of the tile you wish to view: '))
+                except:
+                    dual_print('Error: Not a Number.')
+                    continue
+                else:
+                    if validate_position(new_x, map.width):
+                        break
+                    else:
+                        print('Error: That position is out of bounds.')
+                        continue
+                        
+            while 1:
+                try:
+                    new_y = int(dual_input('Enter the Y-position of the tile you wish to view: '))
+                except:
+                    dual_print('Error: Not a Number.')
+                    continue
+                else:
+                    if validate_position(new_y, map.height):
+                        break
+                    else:
+                        print('Error: That position is out of bounds.')
+                        continue
+                    
+            return((new_x, new_y))                            
+                        
+                
+                
+                
+            
+                    
+            
         
             
 
@@ -280,10 +355,58 @@ def edit_tile(pos):
         command = get_commands()
         parsed_data = parse_command(command, map.tiles[(pos[0], pos[1])])
 
-        if type(parsed_data) == type(map.tiles[(pos[0], pos[1])]):
+        if type(parsed_data) == type(map.tiles[(0, 0)]):
             map.tiles[(pos[0], pos[1])] = parsed_data
-
             
-map = setup()
-edit_tile((0,0))
+        elif type(parsed_data) == type(()):
+            edit_tile(parsed_data)
+            break
+            
+        elif parsed_data == 'save':
+            dual_print('Saving...')
+            data = {'CONSTANTS' : {'MAP_NAME' : map.name, 'MAP_HEIGHT' : map.height, 'MAP_WIDTH' : map.width, 'TILE_HEIGHT' : map.tiles[(0, 0)].height, 'TILE_WIDTH' : map.tiles[(0, 0)].width},
+                    'TILES' : {}}
+            for key, tile in map.tiles.items():
+                json_tile = {'FIELDS' : []}
+                for field in tile.fields:
+                    json_field = {'NAME' : field.name, 'DIMENSIONS' : field.dimensions, 'ANCHOR' : field.anchor, 'CLIPPING' : field.clipping}
+                    json_tile['FIELDS'].append(json_field)
+            
+                data['TILES'][str(key)] = json_tile
+                
+            export(data)
+            dual_print('Saved!')
 
+
+
+
+if __name__ == '__main__':
+    dual_print('Welcome to the VectorMaps Editor.')
+    
+    while 1:
+        choice = str(dual_input('To create a new map, enter \'new\'. To load a map, enter \'load\'. To exit, enter \'exit\'.'))
+        if choice == 'new':
+            map = setup()
+            edit_tile((0,0))
+            break
+    
+        elif choice == 'load':
+            fname = str(dual_input('What is the name of the file you want to open?'))
+            if path.isfile(fname):
+                with open('data.json', 'w') as infile:
+                    data = json.load(infile)
+                    infile.close()
+
+                map = VectorMaps.Map(data['CONSTANTS']['MAP_HEIGHT'], data['CONSTANTS']['MAP_HEIGHT'], name=data['CONSTANTS']['MAP_NAME'])
+                #for tile in data['TILES']
+                
+        
+        elif choice == 'exit':
+            print('Exiting program.')
+            sys.exit()
+            
+        else:
+            dual_print('Invalid input.')
+            continue
+        
+        
