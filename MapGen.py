@@ -18,7 +18,7 @@ def get_commands():
     return command
     
 def validate_position(position, bound):
-    if position not in range(bound):
+    if position not in range(bound + 1):
         return False
     else:
         return True
