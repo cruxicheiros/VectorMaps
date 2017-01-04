@@ -259,6 +259,7 @@ def parse_command(command, tile):
     'goto' : [],
     'help' : ['field', 'goto'],
     'save' : [],
+    'exit' : []
     }
     
     
@@ -295,7 +296,10 @@ def parse_command(command, tile):
         elif commands[0] == 'save':
             return 'save'
 
-        
+        elif commands[0] == 'exit':
+            dual_print('Exiting program.')
+            sys.exit()
+            
         elif commands[0] == 'goto':        
             while 1:
                 try:
@@ -323,8 +327,7 @@ def parse_command(command, tile):
                         dual_print('Error: That position is out of bounds.')
                         continue
                     
-            return((new_x, new_y))                            
-                        
+            return((new_x, new_y))
                 
                 
                 
