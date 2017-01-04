@@ -40,7 +40,7 @@ def list_fields(tile): #Lists fields within a tile
             dual_print(f.name + ',')
             
             
-    return tile
+    return
 
 def create_field(tile):
     field_name = str(dual_input('Enter a name for the new field: '))
@@ -285,11 +285,11 @@ def parse_command(command, tile):
                 if commands[1] not in options:
                     raise Error
                 else:
-                    dual_print('Extended help menu is coming soon') # DO THIS AFTER EVERYTHING ELSE!
-                    dual_print('Valid arguments are \'field\', \'help\'.')
+                    dual_print('Extended help menu is coming soon')
+                    dual_print('Valid arguments are \'field\', \'help\', \'goto\', \'save\', \'exit\'.')
             
             except:
-                dual_print('Valid commands and arguments are \'field\', \'help\'.')            
+                dual_print('Valid commands and arguments are \'field\', \'help\', \'goto\', \'save\', \'exit\'.')            
                 #raise
                 
         elif commands[0] == 'save':
@@ -307,7 +307,7 @@ def parse_command(command, tile):
                     if validate_position(new_x, map.width):
                         break
                     else:
-                        print('Error: That position is out of bounds.')
+                        dual_print('Error: That position is out of bounds.')
                         continue
                         
             while 1:
@@ -320,7 +320,7 @@ def parse_command(command, tile):
                     if validate_position(new_y, map.height):
                         break
                     else:
-                        print('Error: That position is out of bounds.')
+                        dual_print('Error: That position is out of bounds.')
                         continue
                     
             return((new_x, new_y))                            
@@ -329,7 +329,6 @@ def parse_command(command, tile):
                 
                 
             
-                    
             
         
             
@@ -342,7 +341,7 @@ def setup():
     MAP_HEIGHT = int(dual_input('How tall should the map be (in tiles)?: '))
     MAP_WIDTH = int(dual_input('How wide should the map be (in tiles)?: '))
 
-    map = VectorMaps.Map(MAP_HEIGHT, MAP_WIDTH, name=MAP_NAME)
+    map = VectorMaps.Map(MAP_WIDTH, MAP_HEIGHT, name=MAP_NAME)
     
     dual_print('Map object created. Propagating...')
     map.propagate(tile_width=TILE_WIDTH, tile_height=TILE_HEIGHT)
@@ -350,7 +349,7 @@ def setup():
     return map
 
 def edit_tile(pos):
-    print('Now editing tile' + str(pos) + '. Type \'help\' for a list of commands.')
+    dual_print('Now editing tile' + str(pos) + '. Type \'help\' for a list of commands.')
     while 1:
         command = get_commands()
         parsed_data = parse_command(command, map.tiles[(pos[0], pos[1])])
@@ -361,6 +360,10 @@ def edit_tile(pos):
         elif type(parsed_data) == type(()):
             edit_tile(parsed_data)
             break
+            
+        elif parsed_data == 'exit':
+            dual_print('Closing program.')
+            sys.exit()
             
         elif parsed_data == 'save':
             dual_print('Saving...')
@@ -393,16 +396,26 @@ if __name__ == '__main__':
         elif choice == 'load':
             fname = str(dual_input('What is the name of the file you want to open?'))
             if path.isfile(fname):
-                with open('data.json', 'w') as infile:
+                with open('data.json', 'r') as infile:
                     data = json.load(infile)
                     infile.close()
 
-                map = VectorMaps.Map(data['CONSTANTS']['MAP_HEIGHT'], data['CONSTANTS']['MAP_HEIGHT'], name=data['CONSTANTS']['MAP_NAME'])
-                #for tile in data['TILES']
+                map = VectorMaps.Map(data['CONSTANTS']['MAP_WIDTH'], data['CONSTANTS']['MAP_HEIGHT'], name=data['CONSTANTS']['MAP_NAME'])
+                
+                for i in data['TILES']:
+                    coords = i.strip('(').strip(')').split(',')
+                    key = (int(coords[0]), int(coords[1]))
+                    map.tiles[key] = VectorMaps.Tile(key, data['CONSTANTS']['TILE_WIDTH'], data['CONSTANTS']['TILE_HEIGHT'])
+                    
+                    for j in data['TILES'][i]['FIELDS']:
+                        map.tiles[key].fields.append(VectorMaps.Field(j['DIMENSIONS'], j['ANCHOR'], clipping=j['CLIPPING'], name=j['NAME']))
+                    
+                edit_tile((0,0))
+                break
                 
         
         elif choice == 'exit':
-            print('Exiting program.')
+            dual_print('Exiting program.')
             sys.exit()
             
         else:

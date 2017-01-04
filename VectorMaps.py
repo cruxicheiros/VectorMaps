@@ -1,20 +1,19 @@
 class Field: #Not like a field of a grass; more like an electromagnetic field. Can have multiple properties that activate when you're in it. More than one field can be in the same area.
-    def __init__(self, dimensions, anchor, clipping=False, teleport=False, path=False, name = 'unnamed field'):
+    def __init__(self, dimensions, anchor, clipping=False, teleport=False, name = 'unnamed field'):
         self.dimensions = dimensions
         self.anchor = anchor #The anchor is the upper left corner of the field.
         
         # Various properties
         self.clipping = clipping # Can you walk through it? If clipping = True, no.
-        self.teleport = teleport # Will you be transported to a different map? If teleport = False, no.
-        self.path = path # If the field is a path, hints will be given to follow it
+        self.teleport = teleport # Will you be transported to a different map? If teleport = False, no. Not currently implemented
         self.name = name # For human identification
 
         
 class Tile:
-    def __init__(self, pos, width, height, fields = [], name='unnamed tile'):
+    def __init__(self, pos, width, height, name='unnamed tile'):
         self.width = width
         self.height = height
-        self.fields = fields
+        self.fields = [] #Not an argument to avoid issues with python and mutable default arguments
         self.pos = pos
         self.name = name
         
@@ -31,6 +30,7 @@ class Tile:
                 
                     row = row + append
                     print(append)
+                    
             print(f.name + ', clipping =', f.clipping, ', teleport =', f.teleport, ', path =', f.path)
             print('\n\n\n')        
 class Map:
@@ -59,10 +59,3 @@ class Map:
         t.text_display()
                       
                       
-                        
-cat = Map()
-
-cat.propagate()
-
-cat.text_display((0,3))
-cat.fields_at_location((0,3), (2,2))
