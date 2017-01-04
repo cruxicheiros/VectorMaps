@@ -114,6 +114,7 @@ def create_field(tile):
             
     
     dual_print('Creating field...')
+    
     tile.fields.append(VectorMaps.Field([field_width, field_height],[anchor_x, anchor_y], name=field_name, clipping=field_clips))
     dual_print('Done. Returning to tile edit mode.')
     return tile
@@ -327,7 +328,8 @@ def parse_command(command, tile):
                         dual_print('Error: That position is out of bounds.')
                         continue
                     
-            return((new_x, new_y))
+            return((new_x, new_y))                            
+                        
                 
                 
                 
