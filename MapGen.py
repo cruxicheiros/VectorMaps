@@ -334,12 +334,52 @@ def parse_command(command, tile):
             
 
 def setup():
-    MAP_NAME = dual_input('Please name the map: ')
+    while 1:
+        try:
+            MAP_NAME = str(dual_input('Please name the map: '))
+        except:
+            print("Invalid name.")
+            continue
+        else:
+            break
+            
+    while 1:
+        try:
+            TILE_WIDTH = int(dual_input('What should the width of each tile be?: '))
+        except:
+            print("Error: Not a Number")
+            continue
+        else:
+            break
+            
+    while 1:
+        try:
+            TILE_HEIGHT = int(dual_input('What should the height of each tile be?: '))
+        except:
+            print("Error: Not a Number")
+            continue
+        else:
+            break
+            
+    while 1:
+        try:
+            MAP_WIDTH = int(dual_input('How wide should the map be (in tiles)?: '))
+        except:
+            print("Error: Not a Number")
+            continue
+        else:
+            break
+            
+    while 1:
+        try:
+            MAP_HEIGHT = int(dual_input('How tall should the map be (in tiles)?: '))
+        except:
+            print("Error: Not a Number")
+            continue
+        else:
+            break
+            
 
-    TILE_HEIGHT = int(dual_input('What should the height of each tile be?: '))
-    TILE_WIDTH = int(dual_input('What should the width of each tile be?: '))
-    MAP_HEIGHT = int(dual_input('How tall should the map be (in tiles)?: '))
-    MAP_WIDTH = int(dual_input('How wide should the map be (in tiles)?: '))
 
     map = VectorMaps.Map(MAP_WIDTH, MAP_HEIGHT, name=MAP_NAME)
     
