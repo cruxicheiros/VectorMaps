@@ -1,17 +1,35 @@
 import VectorMaps, json, sys
 from os import system, path
-
+import unicornhat as UnicornHat
+from random import randint
+UnicornHat.brightness(0.4)
 
 #Used instead of print() and input() for purposes of accessibility to screenreaders
 def dual_print(string):
-    system("title "+string)
+    #system("title "+string)
     print(string + '\n')
     
 def dual_input(string):
-    system("title "+string)
+    #system("title "+string)
     return input(string)
     
 #Utility functions
+
+def light_display(tile):
+    for row in range(8):
+        for col in range(8):
+            field_list = tile.fields_at_location((row, col))
+            field_num = len(field_list)
+            if field_list == []:
+                UnicornHat.set_pixel(row, col, 0, 0, 0)
+            elif field_num == 1:
+                UnicornHat.set_pixel(row, col, 0, 0, 255)
+            elif field_num == 2:
+                UnicornHat.set_pixel(row, col, 128, 0, 128)
+            else:
+                UnicornHat.set_pixel(row, col, 255, 0, 0)
+        
+    UnicornHat.show()
     
 def get_commands():
     command = dual_input('Please enter a command: ')
@@ -29,6 +47,7 @@ def export(data):
         outfile.close()
     
 #Commands that can be used in tile edit mode
+
 
 def list_fields(tile): #Lists fields within a tile
     if tile.fields == []:
@@ -328,7 +347,8 @@ def parse_command(command, tile):
                         dual_print('Error: That position is out of bounds.')
                         continue
                     
-            return((new_x, new_y))                            
+            return((new_x, new_y))
+                                    
                         
                 
                 
@@ -396,6 +416,7 @@ def setup():
 def edit_tile(pos):
     dual_print('Now editing tile' + str(pos) + '. Type \'help\' for a list of commands.')
     while 1:
+        light_display(map.tiles[(pos[0], pos[1])])
         command = get_commands()
         parsed_data = parse_command(command, map.tiles[(pos[0], pos[1])])
 
