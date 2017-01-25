@@ -203,12 +203,12 @@ def edit_field(tile):
         elif option == 'clipping':
             field_clips = dual_input('Can entities pass through this field? Y/n: ')
             if field_clips.lower() == 'y':
-                tile.fields[active_field_index].clipping = True
-                dual_print('Clipping set to True')
-                break
-            elif field_clips.lower() == 'n':
                 tile.fields[active_field_index].clipping = False
                 dual_print('Clipping set to False')
+                break
+            elif field_clips.lower() == 'n':
+                tile.fields[active_field_index].clipping = True
+                dual_print('Clipping set to True')
                 break
             else:
                 dual_print('Invalid input. Cancelling action.')
